@@ -1,0 +1,62 @@
+[
+  {
+    "user_request": "bir klasör oluştur",
+    "llama3_response": {
+      "thought": "Kullanıcı bir klasör oluşturmak istiyor ancak sahip olduğum araçlar arasında 'create_dir' bulunmuyor. Bu işlemi doğrudan gerçekleştiremem.",
+      "final_response": "Üzgünüm, bu işlemi gerçekleştirecek bir araca sahip değilim. Lütfen farklı bir işlem deneyin."
+    }
+  },
+  {
+    "user_request": "bir dosyaya 'merhaba dünya' yaz",
+    "llama3_response": {
+      "thought": "Kullanıcı bir dosyaya yazmak istiyor ancak sahip olduğum araçlar arasında 'write_file' bulunmuyor. Bu işlemi doğrudan gerçekleştiremem.",
+      "final_response": "Üzgünüm, bu işlemi gerçekleştirecek bir araca sahip değilim. Lütfen farklı bir işlem deneyin."
+    }
+  },
+  {
+    "user_request": "bir dosyanın içeriğini oku",
+    "llama3_response": {
+      "thought": "Kullanıcı bir dosyanın içeriğini okumak istiyor ancak sahip olduğum araçlar arasında 'read_file' bulunmuyor. Bu işlemi doğrudan gerçekleştiremem.",
+      "final_response": "Üzgünüm, bu işlemi gerçekleştirecek bir araca sahip değilim. Lütfen farklı bir işlem deneyin."
+    }
+  },
+  {
+    "user_request": "bir uygulamayı başlat",
+    "llama3_response": {
+      "thought": "Kullanıcı bir uygulamayı başlatmak istiyor. 'run_process_safe' aracını kullanarak bu işlemi gerçekleştirebilirim.",
+      "tool_call": {
+        "action": "run_process_safe",
+        "parameters": {
+          "command": "notepad.exe",
+          "args": "",
+          "timeout": 5
+        }
+      }
+    }
+  },
+  {
+    "user_request": "fareyi 100, 200 konumuna taşı",
+    "llama3_response": {
+      "thought": "Kullanıcı fareyi belirli bir konuma taşımak istiyor. 'mouse_move' aracını kullanarak bu işlemi gerçekleştirebilirim.",
+      "tool_call": {
+        "action": "mouse_move",
+        "parameters": {
+          "x": 100,
+          "y": 200
+        }
+      }
+    }
+  },
+  {
+    "user_request": "ekrana 'test' yaz",
+    "llama3_response": {
+      "thought": "Kullanıcı ekrana yazı yazmak istiyor. 'keyboard_type' aracını kullanarak bu işlemi gerçekleştirebilirim.",
+      "tool_call": {
+        "action": "keyboard_type",
+        "parameters": {
+          "text": "test"
+        }
+      }
+    }
+  }
+]

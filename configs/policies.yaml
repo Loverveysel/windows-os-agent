@@ -1,0 +1,17 @@
+allowed_paths:
+  - "C:\\Users\\*"
+  - "C:\\Program Files\\*"
+  - "C:\\Program Files (x86)\\*"
+  - "C:\\Windows\\*"
+
+allowed_file_types:
+  - ".txt"
+  - ".log"
+  - ".json"
+  - ".yaml"
+
+disallowed_commands:
+  - "shutdown"
+  - "format"
+  - "delete"
+  - "move"

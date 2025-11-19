@@ -1,0 +1,19 @@
+agent:
+  api_endpoint: "https://api.example.com"
+  timeout: 30
+  log_level: "INFO"
+  max_retries: 3
+  retry_delay: 5
+  allowed_commands:
+    - "list_files"
+    - "delete_file"
+    - "create_file"
+    - "read_file"
+  security:
+    enable_security: true
+    allowed_paths:
+      - "C:\\Users\\Public"
+      - "C:\\Temp"
+    disallowed_file_types:
+      - ".exe"
+      - ".bat"

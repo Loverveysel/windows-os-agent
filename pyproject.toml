@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "windows-os-agent"
+version = "0.1.0"
+description = "A Windows OS Agent with a Planner-Executor architecture for securely executing JSON commands."
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+psutil = "^5.8.0"
+send2trash = "^1.8.0"
+# Add any LLM client libraries here, e.g., openai = "^0.11.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

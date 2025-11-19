@@ -1,0 +1,7 @@
+psutil
+send2trash
+openai
+requests
+pyyaml
+jsonschema
+pytest

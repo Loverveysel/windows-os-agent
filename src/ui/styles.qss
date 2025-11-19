@@ -1,0 +1,30 @@
+/* Modern light/dark placeholder styles */
+QWidget {
+    font-family: "Segoe UI", "Helvetica Neue", Arial;
+    font-size: 11pt;
+    color: #222;
+    background: #f6f7f9;
+}
+#appHeader {
+    font-weight: 700;
+    font-size: 14pt;
+    padding: 12px;
+}
+QPushButton {
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: #2b79ff;
+    color: white;
+    border: none;
+}
+QPushButton:hover { background: #1a63e6; }
+QListView {
+    background: transparent;
+    border: none;
+    padding: 8px;
+}
+QTextEdit {
+    border-radius: 8px;
+    background: white;
+    padding: 8px;
+}
