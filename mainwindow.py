@@ -10,8 +10,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout, QSizePolicy, QFrame, QScrollArea, QDesktopWidget
 )
 from PyQt5.QtGui import QColor, QFont
-
-from PyQt5 import QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 from src.cursor.set_cursor import restore_cursor
 from src.orchestrator import run_orchestrator
@@ -110,8 +109,8 @@ class MainWindow(QMainWindow):
         splitter.setHandleWidth(6)
 
         # Sidebar (minimal)
-        sidebar = QWidget()
-        s_layout = QVBoxLayout(sidebar)
+        self.sidebar = QWidget()
+        s_layout = QVBoxLayout(self.sidebar)
         header = QLabel("Windows OS Agent")
         header.setStyleSheet("font-weight:700;padding:8px;")
         new_chat_btn = QPushButton("New Chat")
@@ -146,7 +145,7 @@ class MainWindow(QMainWindow):
         ib_layout.addWidget(send_btn)
         chat_layout.addWidget(input_bar)
 
-        splitter.addWidget(sidebar)
+        splitter.addWidget(self.sidebar)
         splitter.addWidget(chat_container)
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
@@ -165,14 +164,7 @@ class MainWindow(QMainWindow):
         self.input_edit.clear()
 
     def on_send_clicked(self):
-        ag = QDesktopWidget().availableGeometry()
-        sg = QDesktopWidget().screenGeometry()
-
-        widget = self.geometry()
-        x = ag.width() - widget.width()
-        y = 2 * ag.height() - sg.height() - widget.height()
-        self.move(x, y)
-
+        self.enterMiniMode()
         prompt = self.input_edit.toPlainText().strip()
         if not prompt:
             return
@@ -186,6 +178,7 @@ class MainWindow(QMainWindow):
         self._worker.step_signal.connect(self.handle_orchestrator_step)
         self._worker.finished.connect(self.on_worker_finished)
         self._worker.start()
+        self.exitMiniMode()
 
     def handle_orchestrator_step(self, step: Dict[str, Any]):
         """
@@ -242,6 +235,34 @@ class MainWindow(QMainWindow):
         # optional post-run actions
         pass
 
+    def enterMiniMode(self):
+        self.setWindowFlags(
+            QtCore.Qt.WindowStaysOnTopHint |
+            QtCore.Qt.FramelessWindowHint |
+            QtCore.Qt.Tool
+        )
+
+        screen = QtWidgets.QApplication.primaryScreen()
+        geo = screen.availableGeometry()
+
+        w = self.width()
+        h = self.height()
+
+        x = geo.x() + geo.width() - w
+        y = geo.y()
+        self.move(x, y)
+
+        self.show()
+
+    def resizeEvent(self, event):
+        if self.width() < 800:
+            self.sidebar.hide()
+        else:
+            self.sidebar.show()
+
+    def exitMiniMode(self):
+        self.setWindowFlags(QtCore.Qt.Widget)
+        self.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
