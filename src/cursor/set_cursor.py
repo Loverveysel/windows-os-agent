@@ -4,6 +4,14 @@ from ctypes import wintypes
 user32 = ctypes.windll.user32
 gdi32 = ctypes.windll.gdi32
 
+# --- TİP TANIMLAMALARI (Bunu yapmadığın için patlıyordun) ---
+gdi32.GetBitmapBits.argtypes = [wintypes.HBITMAP, wintypes.LONG, ctypes.c_void_p]
+gdi32.GetBitmapBits.restype = wintypes.LONG
+gdi32.SetBitmapBits.argtypes = [wintypes.HBITMAP, wintypes.DWORD, ctypes.c_void_p]
+gdi32.SetBitmapBits.restype = wintypes.LONG
+gdi32.GetObjectW.argtypes = [wintypes.HGDIOBJ, ctypes.c_int, ctypes.c_void_p]
+gdi32.GetObjectW.restype = ctypes.c_int
+
 cursor_ids = [
     32512,  # OCR_NORMAL
     32513,  # OCR_IBEAM
@@ -11,6 +19,10 @@ cursor_ids = [
     32514,  # OCR_WAIT
     32650,  # OCR_CROSS
     32651,  # OCR_UP
+    32642,
+    32643,
+    32644,
+    32645
 ]
 
 class ICONINFO(ctypes.Structure):
@@ -33,42 +45,63 @@ class BITMAP(ctypes.Structure):
         ("bmBits", ctypes.c_void_p)
     ]
 
-
-def change_cursor_to_red(ocr):
+def change_cursor_color(ocr): # Fonksiyon ismini düzelttim
     hcur = user32.LoadCursorW(None, ctypes.c_int(ocr))
-    hicon = user32.CopyIcon(hcur)
+    if not hcur:
+        return # Cursor yüklenemezse çık
 
+    hicon = user32.CopyIcon(hcur)
+    
     iconinfo = ICONINFO()
-    user32.GetIconInfo(hicon, ctypes.byref(iconinfo))
+    if not user32.GetIconInfo(hicon, ctypes.byref(iconinfo)):
+        return
+
+    # KRİTİK KONTROL: Siyah-beyaz imleçlerin renk bitmap'i olmaz
+    if not iconinfo.hbmColor:
+        # Mask bitmap'i silip çıkmalıyız yoksa leak oluşur (Handle sızıntısı)
+        gdi32.DeleteObject(iconinfo.hbmMask)
+        user32.DestroyIcon(hicon)
+        print(f"Cursor {ocr} has no color map (monochrome). Skipping.")
+        return
 
     bmpinfo = BITMAP()
-    gdi32.GetObjectW(ctypes.c_void_p(iconinfo.hbmColor), ctypes.sizeof(bmpinfo), ctypes.byref(bmpinfo))
+    gdi32.GetObjectW(iconinfo.hbmColor, ctypes.sizeof(bmpinfo), ctypes.byref(bmpinfo))
 
     width = bmpinfo.bmWidth
     height = bmpinfo.bmHeight
-
+    
+    # Buffer boyutunu hesapla
     buf_size = width * height * 4
     pixels = (ctypes.c_uint8 * buf_size)()
+    
+    # ARTIK BURASI PATLAMAYACAK
     gdi32.GetBitmapBits(iconinfo.hbmColor, buf_size, pixels)
 
-    # OK ŞEKLİNİ BOZMAMAK İÇİN SADECE ALPHA KANALINA ETKİ EDEN "overlay" UYGULA
     for i in range(0, buf_size, 4):
-        # Eğer piksel tamamen şeffaf değilse → yani ok'un bir parçasıysa
-        if pixels[i+3] != 0:
-            # RENGİ YAVAŞÇA KIRMIZIYA KAYDIR
-            pixels[i+2] = 255    # Red
-            pixels[i+1] = int(pixels[i+1] * 0.3)
-            pixels[i+0] = int(pixels[i+0] * 0.3)
+        if pixels[i+3] != 0: # Alpha kanalı kontrolü
+            # Basit bir grileştirme/renklendirme
+            pixels[i+2] = 20   # Red
+            pixels[i+1] = 40   # Green
+            pixels[i+0] = 40   # Blue
 
     gdi32.SetBitmapBits(iconinfo.hbmColor, buf_size, pixels)
 
     new_cursor = user32.CreateIconIndirect(ctypes.byref(iconinfo))
     user32.SetSystemCursor(new_cursor, ocr)
+    
+    # TEMİZLİK YAPMAK ZORUNDASIN
+    # CreateIconIndirect yeni bir kopya oluşturdu, eskileri silmelisin.
+    # Yoksa GDI Object limitini doldurup Windows'u çökertirsin.
+    gdi32.DeleteObject(iconinfo.hbmMask)
+    gdi32.DeleteObject(iconinfo.hbmColor)
+    user32.DestroyIcon(hicon)
 
-def tint_cursor_red_correct():
+def tint_cursor_color_correct():
     for cursor_id in cursor_ids:
-        change_cursor_to_red(0)
-
+        try:
+            change_cursor_color(cursor_id)
+        except Exception as e:
+            print(f"Error on cursor {cursor_id}: {e}")
 
 def restore_cursor():
     SPI_SETCURSORS = 0x57

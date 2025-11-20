@@ -1,7 +1,7 @@
 import traceback
 from typing import Any, Dict, Generator
 
-from .cursor.set_cursor import tint_cursor_red_correct, restore_cursor
+from .cursor.set_cursor import tint_cursor_color_correct, restore_cursor
 from .agent.executor.executor_core import ExecutorCore
 from .agent.planner.planner_client import PlannerClient
 
@@ -28,7 +28,7 @@ def run_orchestrator(prompt: str) -> Generator[Dict[str, Any], None, None]:
     """
     planner = PlannerClient(REACT_PROMPT, SUMMARIZER_PROMPT)
     executor = ExecutorCore()
-    tint_cursor_red_correct()
+    tint_cursor_color_correct()
 
     # 1) announce user prompt
     yield {"type": "user_prompt", "content": prompt}

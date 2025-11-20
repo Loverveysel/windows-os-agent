@@ -7,11 +7,13 @@ from typing import Dict, Any
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QSize
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QSplitter, QListWidget, QListWidgetItem,
-    QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout, QSizePolicy, QFrame, QScrollArea
+    QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout, QSizePolicy, QFrame, QScrollArea, QDesktopWidget
 )
 from PyQt5.QtGui import QColor, QFont
 
-from src.cursor.set_cursor import tint_cursor_red_correct, restore_cursor
+from PyQt5 import QtGui
+
+from src.cursor.set_cursor import restore_cursor
 from src.orchestrator import run_orchestrator
 
 
@@ -96,6 +98,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Windows OS Agent - GUI")
+        self.setWindowIcon(QtGui.QIcon("./public/icon.png"))
+        
         self.resize(1100, 700)
 
         # Top-level layout: sidebar + main chat
@@ -161,6 +165,14 @@ class MainWindow(QMainWindow):
         self.input_edit.clear()
 
     def on_send_clicked(self):
+        ag = QDesktopWidget().availableGeometry()
+        sg = QDesktopWidget().screenGeometry()
+
+        widget = self.geometry()
+        x = ag.width() - widget.width()
+        y = 2 * ag.height() - sg.height() - widget.height()
+        self.move(x, y)
+
         prompt = self.input_edit.toPlainText().strip()
         if not prompt:
             return
