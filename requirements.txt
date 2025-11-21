@@ -5,3 +5,7 @@ requests
 pyyaml
 jsonschema
 pytest
+pywinauto
+pyautogui
+ollama
+PyQt5
