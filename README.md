@@ -1,120 +1,261 @@
-Windows OS Agent: Vision-Based Multimodal Autonomous Agent
-Windows OS Agent is an experimental autonomous agent designed to interact with the operating system using a Vision-First approach, bypassing traditional Accessibility APIs (DOM, UI Automation).
+# 👁️ Windows OS Agent: Vision-Based Autonomous System
 
-Leveraging the power of Large Language Models (LLMs) for reasoning and Computer Vision (YOLO + OCR) for grounding, this agent perceives the screen like a human and executes actions via mouse/keyboard simulation. This project explores the potential of Multimodal AI in automating legacy or non-standard interfaces (e.g., Spotify, Discord, Games).
+Windows OS Agent is an experimental autonomous system that uses **local LLM reasoning** and **screen-based visual perception** to control Windows applications as if a human were operating the machine.  
+Unlike traditional automation tools, it does not rely on API endpoints, DOM access, or accessibility trees.
 
-🎯 Problem Statement & Vision
-Traditional automation tools (Selenium, PyWinAuto) rely on structured data provided by the OS. However, many modern applications (Electron-based) or legacy software do not expose these structures effectively.
+---
 
-Windows OS Agent solves this by implementing a closed-loop cognitive cycle:
+## 📑 Table of Contents
 
-Perceive: Capture and analyze the screen using a hybrid vision parser.
+- [Features](#-features)
+- [Current Vision Pipeline](#-current-vision-pipeline)
+- [Planned Vision Parser (YOLO Integration)](#-planned-vision-parser-yolo-integration)
+- [Architecture](#-architecture)
+- [Compatibility & Requirements](#-compatibility--requirements)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Configuration](#-configuration)
+- [Roadmap](#-roadmap)
+- [License](#-license)
 
-Reason: Determine the next logical step using a local LLM.
+---
 
-Act: Execute the action physically (Human-Computer Interaction simulation).
+## ✨ Features
 
-🏗️ System Architecture
-The project follows a modular architecture designed for extensibility and research:
+### **Vision-First Agent Core**
 
-Kod snippet'i
+The agent operates by _seeing_ the screen, interpreting what is visible, and acting accordingly.
 
-graph TD
-User[User Prompt] --> GUI[PyQt5 Dashboard]
-GUI --> Planner[Planner (Gemma 3 12b)]
+### **Local LLM Reasoning**
 
-    subgraph "Perception Loop"
-        Screenshot[Screen Capture] --> Vision[Vision Parser]
-        Vision -- "Object Detection" --> YOLO[YOLOv11n]
-        Vision -- "Text Recognition" --> OCR[Tesseract / EasyOCR]
-        YOLO & OCR --> SemanticData[Structured UI Elements]
-    end
+Powered by **Gemma 3 (12B)** via **Ollama**.  
+All reasoning, planning, and action selection is performed locally.
 
-    Planner -- "Decision & Tool Call" --> Executor[Executor Core]
-    Executor -- "Action (Click/Type)" --> OS[Windows OS]
-    OS --> Screenshot
-    SemanticData --> Planner
+### **Image-Based Decision Making (Current Implementation)**
 
-Core Components
-🧠 Planner (The Brain): Powered by Gemma 3 12b (via Ollama). It handles intent understanding, step-by-step planning, and error recovery.
+- The agent captures a **full-screen screenshot**.
+- This screenshot is embedded into the LLM request as:
 
-👁️ Vision Parser (The Eye): A hybrid module combining YOLOv11 for UI element detection (buttons, inputs) and OCR for text extraction. This reduces the hallucination rate common in pure Vision-Language Models (VLMs).
+```json
+"images": ["<base64-encoded-screenshot>"]
+```
 
-🦾 Executor (The Hand): Handles low-level OS interactions. It includes safety policies to prevent hazardous commands.
+## - The model analyzes the raw image (like a human) and decides:
 
-🖥️ Observer UI: A real-time PyQt5 dashboard that visualizes the agent's "Chain of Thought," current vision analysis, and execution logs.
+- where to click
 
-🚀 Installation
-This project requires a local LLM server.
+- what to type
 
-Prerequisites
-Python 3.10+
+- how to proceed in an automation task> **Status:** This is the _current and only_ active perception pipeline.
 
-Ollama (Must be installed and running)
+### **Realtime UI Observation**
 
-NVIDIA GPU with CUDA support (Recommended for real-time performance)
+## PyQt5 interface shows:
 
-Setup
-Clone the Repository:
+- the agent’s reasoning
 
-Bash
+- performed actions
 
-git clone https://github.com/loverveysel/windows-os-agent.git
-cd windows-os-agent
-Create Virtual Environment:
+## 📸 Current Vision Pipeline
 
-Bash
+## At the moment, **there is no active YOLO or OCR parsing**.The LLM receives the **entire screenshot**, and the agent works as:1) Capture screenshot
 
-python -m venv venv
+2. Encode to Base64
 
-# Windows:
+3. Send inside the LLM message as an `images` field
 
-venv\Scripts\activate
+4. LLM infers UI elements directly from raw pixels
 
-# Linux/Mac:
+5. LLM outputs a JSON action (e.g., click coordinates)This approach works but is **less accurate** and highly dependent on LLM vision capabilities.
 
-source venv/bin/activate
-Install Dependencies:
+## 🧠 Planned Vision Parser (YOLO Integration)
 
-Bash
+## The Vision Parser is designed but **not implemented yet**.
 
-pip install -r requirements.txt
-Pull the LLM:
+## Planned Workflow
 
-Bash
+Currently, the model receives the full screenshot via Ollama's message interface and makes decisions based on that image.
 
-ollama pull gemma:3-12b
-Run the Agent:
+YOLOv11 integration is under development. The planned workflow is as follows:
 
-Bash
+1. Screenshot is sent through YOLOv11.
+2. YOLO detects UI elements on the screen and assigns each a unique numeric ID:
+   - Buttons
+   - Icons
+   - Input fields
+   - Common Windows UI elements
+   - Custom app interfaces
+3. OCR can optionally extract readable text from the screenshot.
+4. YOLO overlays detected objects with their IDs on the screenshot.
+5. The LLM receives the screenshot (with IDs) instead of raw pixels. When the LLM needs to interact with a UI element, it references the object's ID.
+6. Using the ID, the executor can retrieve the exact coordinates from YOLO's output to perform actions precisely.
 
+Example structured JSON for reference:
+
+```json
+{
+  "objects": [
+    { "id": 1, "label": "button", "bbox": [x1, y1, x2, y2] },
+    { "id": 2, "label": "textbox", "bbox": [x1, y1, x2, y2] }
+  ],
+  "texts": [
+    { "text": "Username", "bbox": [x1, y1, x2, y2] }
+  ]
+}
+```
+
+---
+
+### Benefits:
+
+## - 95%+ detection accuracy
+
+- deterministic element targeting
+
+- stable automation
+
+- less hallucination
+
+- consistent across resolutions\*\*\*
+
+## 🏗️ Architecture
+
+### Perceive → Reason → Act Loop
+
+    graph LR
+        A[User Request] --> B(Planner / LLM)
+        B --> C{Vision Layer}
+        C -->|Current: Raw Screenshot| B
+        C -->|Future: YOLO + OCR JSON| B
+        B -->|Decision| D[Executor]
+        D -->|Mouse/Keyboard| E[Windows OS]
+        E -->|Feedback Screenshot| C
+
+---
+
+### Components
+
+#### **Planner**
+
+## - Interprets user intent
+
+- Uses past steps
+
+- Chooses next high-level command
+
+#### **Vision Parser**
+
+## - **Current:** No parsing — the LLM sees the raw screenshot
+
+- **Future:** YOLO + OCR + object IDs + structured UI map
+
+#### **Executor**
+
+## Uses:
+
+- pywinauto
+
+- pyautogui
+
+- send2trash
+
+## ⚠️ Compatibility & Requirements
+
+### OS
+
+## - Windows 10 / 11 (64-bit)
+
+### Hardware
+
+## - NVIDIA GPU ≥ 8GB VRAM recommended
+
+- 16GB RAM minimum
+
+- CPU-only works, but slower
+
+### Software
+
+## - Python 3.10+
+
+- Ollama (Gemma 3 12B)
+
+- Tesseract OCR (only needed in the future pipeline)
+
+- YOLO model (future vision parser)
+
+## 🚀 Installation
+
+### 1. Clone Repository
+
+```bash
+
+    git clone https://github.com/loverveysel/windows-os-agent.git
+    cd windows-os-agent
+```
+
+---
+
+### 2. Create Virtual Environment
+
+```bash
+    python -m venv venv
+    venv\Scripts\activate
+```
+
+---
+
+### 3. Install Dependencies
+
+```bash
+ pip install -r requirements.txt
+```
+
+### 4. Pull the LLM Model
+
+```bash
+ollama pull gemma:3-12b\*\*\*
+```
+
+## 🎮 Usage
+
+### Start the Agent
+
+```bash
 python main.py
-🧪 Usage
-Launch the application. The control panel will appear on the top-right.
+```
 
-Enter a natural language command (e.g., "Open Spotify and play some rock music").
+### Example Requests
 
-Observe the agent as it captures the screen, reasons about the UI, and moves the mouse.
+## - “Open Notepad and write ‘Hello World’.”
 
-🚧 Research Roadmap & Current Limitations
-This project is an active R&D initiative focused on overcoming the following challenges:
+## - “Open Chrome, search GitHub, and click the first result.”The LLM interprets the screenshot and determines the appropriate UI coordinates.
 
-🔴 Inference Latency: Current local inference (Laptop GPU) averages ~10 seconds per step, limiting real-time interactivity.
+## ⚙️ Configuration
 
-Goal: Implement 4-bit Quantization and benchmark on high-end hardware (RTX 4090/5080) to reach <2s latency.
+    configs/agent.yaml
 
-🔴 Visual Grounding Accuracy: Small UI elements can sometimes be missed by the vision parser.
+## - LLM parameters
 
-Goal: Integrate Set-of-Mark (SoM) prompting techniques to improve spatial reasoning.
+- temperature
 
-🔴 Long-Horizon Planning: The context window limits complex, multi-step workflows.
+- model selection
 
-Goal: Implement a dynamic memory summarizer.
+- SYSTEM
 
-🤝 Contributing
-Contributions are welcome! This project is intended for educational and research purposes. If you are interested in Model Optimization or Visual Prompting, feel free to open an issue or PR.
+## 🗺️ Roadmap
 
-📜 License
-This project is licensed under the MIT License. See the LICENSE file for details.
+## - [ ] **Integrate YOLOv11 Vision Parser**
 
-Developed by Alper Can Özer - Computer Engineering Senior Student
+- [ ] **Generate numbered object maps**
+
+- [ ] **LLM → object_id → bounding box system**
+
+- [ ] **Memory Summarization**
+
+- [ ] **4-bit quantization for 2s-per-step latency**
+
+- [ ] **Linux Support\*\*\***
+
+## 📜 License
+
+## MIT License. See `LICENSE`.**Developer:** Alper Can Özer
