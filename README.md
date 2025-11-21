@@ -258,4 +258,4 @@ python mainwindow.py
 
 ## 📜 License
 
-## MIT License. See `LICENSE`.**Developer:** Alper Can Özer
+# MIT License. See `LICENSE`.**Developer:** Alper Can Özer
