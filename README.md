@@ -116,7 +116,7 @@ Example structured JSON for reference:
 
 - less hallucination
 
-- consistent across resolutions\*\*\*
+- consistent across resolutions
 
 ## 🏗️ Architecture
 
@@ -213,7 +213,7 @@ Example structured JSON for reference:
 ### 4. Pull the LLM Model
 
 ```bash
-ollama pull gemma:3-12b\*\*\*
+ollama pull gemma3:12b\*\*\*
 ```
 
 ## 🎮 Usage
@@ -221,7 +221,7 @@ ollama pull gemma:3-12b\*\*\*
 ### Start the Agent
 
 ```bash
-python main.py
+python mainwindow.py
 ```
 
 ### Example Requests
