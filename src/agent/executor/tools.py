@@ -76,13 +76,13 @@ def mouse_double_click(x: int, y: int, button: str = "left") -> str:
     pyautogui.doubleClick(x=int(x), y=int(y), button=button, duration=0.8)
     return f"double-clicked:{int(x)},{int(y)}:{button}"
 
-def keyboard_press(keys: str = "ENTER") -> str:
+def keyboard_press(text: str = "ENTER") -> str:
     """
     Simulate keyboard key presses using pywinauto.send_keys.
     Supports combos like: CTRL+S, CTRL+SHIFT+ESC, ALT+F4, etc.
     """
 
-    parts = keys.split("+")
+    parts = text.split("+")
     sequence = ""
 
     for p in parts:
@@ -98,7 +98,7 @@ def keyboard_press(keys: str = "ENTER") -> str:
             sequence += f"{{{p_upper}}}"
 
     keyboard.send_keys(sequence)
-    return f"pressed-keys:{keys}"
+    return f"pressed-keys:{text}"
 
 def scroll(amount: int) -> str:
     """

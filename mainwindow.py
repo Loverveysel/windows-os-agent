@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QColor, QFont
 from PyQt5 import QtWidgets, QtGui, QtCore
-
 from src.cursor.set_cursor import restore_cursor
 from src.orchestrator import run_orchestrator
 
@@ -232,7 +231,7 @@ class MainWindow(QMainWindow):
         self.msg_list.scrollToBottom()
 
     def on_worker_finished(self):
-        # optional post-run actions
+        self.exitMiniMode()
         pass
 
     def enterMiniMode(self):
@@ -245,7 +244,8 @@ class MainWindow(QMainWindow):
         screen = QtWidgets.QApplication.primaryScreen()
         geo = screen.availableGeometry()
 
-        w = self.width()
+        self.resize(500, self.height())
+        w = 500
         h = self.height()
 
         x = geo.x() + geo.width() - w

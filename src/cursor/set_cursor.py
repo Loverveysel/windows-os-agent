@@ -4,7 +4,6 @@ from ctypes import wintypes
 user32 = ctypes.windll.user32
 gdi32 = ctypes.windll.gdi32
 
-# --- TİP TANIMLAMALARI (Bunu yapmadığın için patlıyordun) ---
 gdi32.GetBitmapBits.argtypes = [wintypes.HBITMAP, wintypes.LONG, ctypes.c_void_p]
 gdi32.GetBitmapBits.restype = wintypes.LONG
 gdi32.SetBitmapBits.argtypes = [wintypes.HBITMAP, wintypes.DWORD, ctypes.c_void_p]
@@ -51,7 +50,7 @@ def change_cursor_color(ocr): # Fonksiyon ismini düzelttim
         return # Cursor yüklenemezse çık
 
     hicon = user32.CopyIcon(hcur)
-    
+
     iconinfo = ICONINFO()
     if not user32.GetIconInfo(hicon, ctypes.byref(iconinfo)):
         return
@@ -69,11 +68,11 @@ def change_cursor_color(ocr): # Fonksiyon ismini düzelttim
 
     width = bmpinfo.bmWidth
     height = bmpinfo.bmHeight
-    
+
     # Buffer boyutunu hesapla
     buf_size = width * height * 4
     pixels = (ctypes.c_uint8 * buf_size)()
-    
+
     # ARTIK BURASI PATLAMAYACAK
     gdi32.GetBitmapBits(iconinfo.hbmColor, buf_size, pixels)
 
@@ -88,7 +87,7 @@ def change_cursor_color(ocr): # Fonksiyon ismini düzelttim
 
     new_cursor = user32.CreateIconIndirect(ctypes.byref(iconinfo))
     user32.SetSystemCursor(new_cursor, ocr)
-    
+
     # TEMİZLİK YAPMAK ZORUNDASIN
     # CreateIconIndirect yeni bir kopya oluşturdu, eskileri silmelisin.
     # Yoksa GDI Object limitini doldurup Windows'u çökertirsin.
@@ -106,3 +105,5 @@ def tint_cursor_color_correct():
 def restore_cursor():
     SPI_SETCURSORS = 0x57
     user32.SystemParametersInfoW(SPI_SETCURSORS, 0, None, 0)
+
+restore_cursor()

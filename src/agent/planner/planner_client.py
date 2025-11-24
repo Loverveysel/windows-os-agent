@@ -71,10 +71,7 @@ class PlannerClient:
 
         try:
             # Call Ollama. The exact signature/return shape may vary by version; handle common shapes below.
-            if images is not None:
-                resp = ollama.chat(model=self.model , messages=msgs, format="json")  
-            else : 
-                resp = ollama.chat(model=self.model , messages=msgs, format="json")
+            resp = ollama.chat(model=self.model , messages=msgs, format="json")  
         except Exception as e:
             raise RuntimeError("ollama.chat call failed", e) from e
 
